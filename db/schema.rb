@@ -10,6 +10,36 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 0) do
+ActiveRecord::Schema.define(version: 2020_10_21_002517) do
+
+  create_table "bags", force: :cascade do |t|
+    t.string "ownersname"
+    t.string "item", default: "pokeball"
+    t.integer "quantity", default: 15
+    t.integer "user_id"
+  end
+
+  create_table "pokeballs", force: :cascade do |t|
+    t.integer "cost"
+    t.string "kind"
+    t.integer "bag_id"
+    t.integer "pokemon_id"
+  end
+
+  create_table "pokemons", force: :cascade do |t|
+    t.string "name"
+    t.string "nickname"
+    t.string "kinds"
+    t.string "species"
+    t.integer "api_poke_id"
+  end
+
+  create_table "users", force: :cascade do |t|
+    t.string "name"
+    t.string "username"
+    t.string "password"
+    t.integer "money", default: 5000
+    t.integer "bag_id"
+  end
 
 end
