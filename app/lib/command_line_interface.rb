@@ -1,6 +1,7 @@
 
 class CLI
 
+@@current_user = ""
 
 def start
     welcome
@@ -13,6 +14,7 @@ def welcome
 end
 
 def intro_prompt
+    binding.pry
     puts "Do you have an account? 'Y' or 'N'"
     account_validation = false
     while account_validation == false do
@@ -24,7 +26,7 @@ def intro_prompt
             account_validation = true
             create_user
         else
-            puts "Invalid input, try again."
+            invalid_input
         end
     end
 end
@@ -37,7 +39,6 @@ def log_in
         username_input = gets.chomp.downcase
         user_obj = User.find_by(username:username_input)
         if user_obj && username_input == user_obj.username
-           
             puts "Please type in your password"
             password_validation = false
            
@@ -45,6 +46,7 @@ def log_in
                 password_input = gets.chomp.downcase
                 pass_obj = User.find_by(password:password_input)
                 if password_input == pass_obj.password && username_input == user_obj.username
+                    @@current_user = username_input
                     password_validation = true
                     user_validation = true
                     main_menu
@@ -84,6 +86,7 @@ def create_user
 end
 
 def main_menu
+    # binding.pry
     main_menu_prompt
     main_menu_validation = false
     while main_menu_validation == false do
@@ -106,10 +109,13 @@ def main_menu
             shop 
             main_menu_validation = true
         when 6
-            goodbye
+            log_out
+            main_menu_validation = true
+        when 7
+            leave
             main_menu_validation = true
         else
-            puts "Invalid number, try again!"
+            invalid_input
         end
     end
 
@@ -124,19 +130,78 @@ def main_menu_prompt
                 3. My Bag
                 4. My Money
                 5. Shop
-                6. Exit
+                6. Log Out
+                7. Exit
             TEXT
 end
 
+def my_money
+    user_obj = User.find_by(username: @@current_user)
+    puts "You have $#{user_obj.money} left!"
+    main_menu
+end
+
+def my_bag
+    user_obj = User.find_by(username: @@current_user)
+    bag_obj = Bag.find_by(user_id: user_obj.id)
+    puts "You have #{bag_obj.quantity} #{bag_obj.item}(s) in your bag."
+    main_menu
+end
+
+def check_money(user, amount)
+    total = amount * 200
+    money_left = user.money - total
+    if money_left < 0
+        puts "You have insufficient money!"
+        return false
+    else
+        puts "Thanks for the purchase! You have $#{money_left} left."
+        return true
+    end
+end
+
+
+
 def shop
-    user_obj = User.find_by
+    user_obj = User.find_by(username: @@current_user)
+    bag_obj = Bag.find_by(user_id: user_obj.id)
+    shop_validation = false
+    while shop_validation == false do
+        puts "How many pokeballs would you like to buy?"
+        amount = gets.chomp.to_i
+        if check_money(user_obj, amount) == true
+            total = amount * 200
+            money_left = user_obj.money - total
+            shop_validation = true
+            user_obj.money = money_left
+            user_obj.save
+            bag_obj.quantity += amount
+            bag_obj.save
+            main_menu
+       end
+    end
+end
+
+
+def log_out
+    goodbye
+    log_in
+    
 end
 
 def goodbye
+    @@current_user = ""
     puts "Thanks for playing!"
 end
 
+def leave
+    goodbye
+    puts "Closing application"
+end
 
+def invalid_input
+    puts "Invalid input, please try again."
+end
 
 end
 
