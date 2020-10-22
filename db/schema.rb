@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2020_10_21_002517) do
+ActiveRecord::Schema.define(version: 2020_10_20_211940) do
 
   create_table "bags", force: :cascade do |t|
     t.string "ownersname"
@@ -39,7 +39,6 @@ ActiveRecord::Schema.define(version: 2020_10_21_002517) do
     t.string "username"
     t.string "password"
     t.integer "money", default: 5000
-    t.integer "bag_id"
   end
 
 end

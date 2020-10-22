@@ -5,7 +5,6 @@ class CreateUsers < ActiveRecord::Migration[6.0]
       t.string :username
       t.string :password
       t.integer :money, default: 5000
-      t.integer :bag_id
     end
   end
 end
