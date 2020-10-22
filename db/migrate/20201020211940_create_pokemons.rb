@@ -5,6 +5,7 @@ class CreatePokemons < ActiveRecord::Migration[6.0]
       t.string :nickname
       t.string :kinds
       t.string :species
+      t.integer :api_poke_id
     end
   end
 end

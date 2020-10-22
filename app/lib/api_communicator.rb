@@ -37,7 +37,6 @@ def get_pokemon_id(api)
     puts api["id"]
 end
 
-pokemon_info
 
 
 
