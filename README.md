@@ -31,7 +31,7 @@ If you would like to contribute to our code, pull request. We will review them a
 
 ## Video Demo
 
-[![Video Demo]](https://youtu.be/6F1khBCCyV0)
+https://youtu.be/6F1khBCCyV0
 
 No copyright infringement intended
 Music: https://ncs.io/music-search?q=lost+sky&genre=&mood=
