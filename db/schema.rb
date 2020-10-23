@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2020_10_20_211940) do
+ActiveRecord::Schema.define(version: 2020_10_23_183045) do
 
   create_table "bags", force: :cascade do |t|
     t.string "ownersname"
@@ -24,6 +24,7 @@ ActiveRecord::Schema.define(version: 2020_10_20_211940) do
     t.string "kind"
     t.integer "bag_id"
     t.integer "pokemon_id"
+    t.boolean "caught"
   end
 
   create_table "pokemons", force: :cascade do |t|
