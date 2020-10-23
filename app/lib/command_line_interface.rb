@@ -1,9 +1,8 @@
 require_relative 'api_communicator.rb'
 
-
 class CLI
 
-@@current_user = ""
+attr_accessor :current_user
 
 def start
     welcome
@@ -12,7 +11,7 @@ end
 
 def welcome
     puts "Welcome to the Pokemonlite CLI
-    "
+    ".red
 end
 
 def intro_prompt
@@ -32,7 +31,6 @@ def intro_prompt
     end
 end
 
-
 def log_in
     puts "Please type in your username"
     user_validation = false
@@ -47,7 +45,7 @@ def log_in
                 password_input = gets.chomp.downcase
                 pass_obj = User.find_by(password:password_input)
                 if password_input == pass_obj.password && username_input == user_obj.username
-                    @@current_user = username_input
+                    @current_user = username_input
                     password_validation = true
                     user_validation = true
                     main_menu
@@ -87,12 +85,10 @@ def create_user
 end
 
 def main_menu
-    binding.pry
     main_menu_prompt
     main_menu_validation = false
     while main_menu_validation == false do
         input = gets.chomp.to_i
-        
         case input
         when 1 
             catch_pokemons
@@ -119,8 +115,6 @@ def main_menu
             invalid_input
         end
     end
-
-    
 end
 
 def main_menu_prompt
@@ -167,28 +161,24 @@ def pokeball_wiggle
 end
 
 def catch_pokemons
-    user_obj = User.find_by(username: @@current_user)
+    user_obj = User.find_by(username: @current_user)
     bag_obj = Bag.find_by(user_id: user_obj.id)
     encounter_pokemon = get_random_api_pokemon
-    poke_name = encounter_pokemon[0]
-    poke_kinds = encounter_pokemon[1]
-    poke_species = encounter_pokemon[2]
-    poke_id = encounter_pokemon[3]
     poke_nickname = ""
     
-    puts "Wild #{poke_name} appeared!
-    "
+    puts "Wild #{encounter_pokemon[:name]} APPEARED!
+    ".red
     catch_pokemon_prompt
     catch_validation = false
     while catch_validation == false do
         input = gets.chomp.to_i
         if check_pokebowls(bag_obj) == true && input == 1
             temp = rand_int
-            bag_obj.quantity -= 1
-            bag_obj.save
+            user_obj.bag.quantity -= 1
+            user_obj.bag.save
             if temp > 6
                 3.times{pokeball_wiggle}
-                puts "You have successfully caught #{poke_name}!"
+                puts "You have successfully caught #{encounter_pokemon[:name]}!"
                 puts "Would you like to name your pokemon? 'Y' or 'N'"
                 name_validation = false
                 while name_validation == false do
@@ -206,23 +196,21 @@ def catch_pokemons
                         invalid_input
                     end
                 end
-            pokemon = Pokemon.create(name:poke_name, nickname: poke_nickname, kinds: poke_kinds, species: poke_species, api_poke_id: poke_id) 
+            pokemon = Pokemon.create(encounter_pokemon)
+            pokemon.nickname = poke_nickname
+            pokemon.save
             pokeball = Pokeball.create(cost:200, kind:"pokeball", bag: bag_obj, pokemon: pokemon)  
             main_menu
             elsif temp <= 6 || temp >= 4
                 2.times{pokeball_wiggle}
                 puts "Arg! SO CLOSE!!"
-                catch_pokemon_prompt
-                
+                catch_pokemon_prompt 
             else 
                 puts "OH NO! Pokemon has broke free!"
                 catch_pokemon_prompt
             end
-
-
         elsif check_pokebowls(bag_obj) == false && input == 1
             puts "Sorry, you have no pokeballs!"
-
         elsif input == 2
             puts "Got away safely!"
             main_menu
@@ -230,23 +218,18 @@ def catch_pokemons
             invalid_input
         end
     end
-
-
 end
 
 def get_all_pokemons
-    user_obj = User.find_by(username: @@current_user)
-    bag_obj = Bag.find_by(user_id: user_obj.id)
-    pokemons = bag_obj.pokemons
-    pokemon_names = []
-    pokemons.map do|p| 
+    user_obj = User.find_by(username: @current_user)
+    pokemons = user_obj.bag.pokemons
+    pokemons.each do|p| 
         if p.nickname == ""
-            pokemon_names << "#{p.name.capitalize} is a #{p.species.capitalize}."
+            puts "#{p.name.capitalize} is a #{p.species.capitalize}."
         else
-            pokemon_names << "#{p.nickname.capitalize} is a #{p.species.capitalize}."
+            puts "#{p.nickname.capitalize} is a #{p.species.capitalize}."
         end
     end
-    puts pokemon_names
 end
 
 
@@ -257,14 +240,13 @@ def my_pokemons
 end
 
 def my_bag
-    user_obj = User.find_by(username: @@current_user)
-    bag_obj = Bag.find_by(user_id: user_obj.id)
-    puts "You have #{bag_obj.quantity} #{bag_obj.item}(s) in your bag."
+    user_obj = User.find_by(username: @current_user)
+    puts "You have #{user_obj.bag.quantity} #{user_obj.bag.item}(s) in your bag."
     main_menu
 end
 
 def my_money
-    user_obj = User.find_by(username: @@current_user)
+    user_obj = User.find_by(username: @current_user)
     puts "You have $#{user_obj.money} left!"
     main_menu
 end
@@ -283,8 +265,7 @@ end
 
 
 def shop
-    user_obj = User.find_by(username: @@current_user)
-    bag_obj = Bag.find_by(user_id: user_obj.id)
+    user_obj = User.find_by(username: @current_user)
     shop_validation = false
     while shop_validation == false do
         puts "How many pokeballs would you like to buy?"
@@ -294,14 +275,13 @@ def shop
             money_left = user_obj.money - total
             shop_validation = true
             user_obj.money = money_left
+            user_obj.bag.quantity += amount
             user_obj.save
-            bag_obj.quantity += amount
-            bag_obj.save
+            user_obj.bag.save
             main_menu
        end
     end
 end
-
 
 def log_out
     goodbye
@@ -310,7 +290,7 @@ def log_out
 end
 
 def goodbye
-    @@current_user = ""
+    @current_user = ""
     puts "Thanks for playing!"
 end
 
@@ -322,7 +302,5 @@ end
 def invalid_input
     puts "Invalid input, please try again."
 end
-
-
 
 end
