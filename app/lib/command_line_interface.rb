@@ -53,7 +53,8 @@ def log_in
             end
         else 
             puts "Invalid username, try again".red
-            puts "Do you want to create an account? 'Yes'"
+            puts "
+            Do you want to create an account? 'Yes'"
             puts "If not, re-type your username"
             if username_input == "yes"
                 user_validation = true
@@ -78,7 +79,6 @@ def create_user
     name = gets.chomp.downcase
     new_user = User.create(name:name, username: username, password:password)
     new_bag = Bag.create(ownersname: "#{name}'s bag", user: new_user)
-    Pokeball.create(cost:200, kind:"pokeball", bag: new_bag)
     puts "Redirecting to the log in 
     ".red 
     log_in
@@ -132,11 +132,18 @@ def delete_account
                 input2 = gets.chomp.downcase
                 if input2 == "yes, i do!!!"
                     user_obj = User.find_by(username:@current_user)
-                    user_obj.delete
+                    pokeballs = user_obj.bag.pokeballs
+                    pokemon_objs = pokeballs.find_all do |p| p.pokemon.id end
+                    array_ids = pokemon_objs.map do |p| p["pokemon_id"] end
+                        array_ids.each do |p| Pokemon.delete(p) end
+                    user_obj.bag.pokeballs.destroy_all
+                    user_obj.bag.destroy
+                    user_obj.destroy
                     @current_user = ""
                     delete_validation = true
                     delete_validation2 = true
                     leave
+                    
                 else
                     delete_validation = true
                     delete_validation2 = true
@@ -233,6 +240,7 @@ def catch_pokemons
                         catch_validation = true
                     elsif input == "n"
                         name_validation = true
+                        poke_nickname = encounter_pokemon[:name]
                         catch_validation = true
                     else
                         invalid_input
@@ -242,6 +250,7 @@ def catch_pokemons
             pokemon.nickname = poke_nickname
             pokemon.save
             pokeball = Pokeball.create(cost:200, kind:"pokeball", bag: bag_obj, pokemon: pokemon)  
+            # binding.pry
             main_menu
             elsif temp <= 6 || temp >= 4
                 2.times{pokeball_wiggle}
