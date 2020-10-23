@@ -135,7 +135,8 @@ def delete_account
                     pokeballs = user_obj.bag.pokeballs
                     pokemon_objs = pokeballs.find_all do |p| p.pokemon.id end
                     array_ids = pokemon_objs.map do |p| p["pokemon_id"] end
-                        array_ids.each do |p| Pokemon.delete(p) end
+                    array_ids.uniq
+                    array_ids.each do |p| Pokemon.delete(p) end
                     user_obj.bag.pokeballs.destroy_all
                     user_obj.bag.destroy
                     user_obj.destroy
@@ -143,7 +144,6 @@ def delete_account
                     delete_validation = true
                     delete_validation2 = true
                     leave
-                    
                 else
                     delete_validation = true
                     delete_validation2 = true
