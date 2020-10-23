@@ -1,5 +1,5 @@
 class User < ActiveRecord::Base
 
-    has_one :bag
+    has_one :bag 
 
 end

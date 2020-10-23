@@ -2,7 +2,7 @@ require_relative 'api_communicator.rb'
 
 class CLI
 
-attr_accessor :current_user
+attr_accessor :current_user, :pokemon
 
 def start
     welcome
@@ -219,8 +219,11 @@ def catch_pokemons
     ".light_cyan
     catch_pokemon_prompt
     catch_validation = false
+    Pokemon.create(encounter_pokemon)
+    created_pokemon_obj = Pokemon.last
     while catch_validation == false do
         input = gets.chomp.to_i
+        # binding.pry
         if check_pokebowls(bag_obj) == true && input == 1
             temp = rand_int
             user_obj.bag.quantity -= 1
@@ -246,21 +249,24 @@ def catch_pokemons
                         invalid_input
                     end
                 end
-            pokemon = Pokemon.create(encounter_pokemon)
-            pokemon.nickname = poke_nickname
-            pokemon.save
-            pokeball = Pokeball.create(cost:200, kind:"pokeball", bag: bag_obj, pokemon: pokemon)  
+            created_pokemon_obj.nickname = poke_nickname
+            created_pokemon_obj.save
+            Pokeball.create(cost:200, kind:"pokeball", bag: bag_obj, pokemon: created_pokemon_obj, caught: true)  
             # binding.pry
             main_menu
             elsif temp <= 6 || temp >= 4
                 2.times{pokeball_wiggle}
                 puts "  Arg! SO CLOSE!!
                 ".magenta
+            Pokeball.create(cost:200, kind:"pokeball", bag: bag_obj, pokemon: created_pokemon_obj, caught: false)
                 catch_pokemon_prompt 
-            else 
+            elsif temp <= 3 || temp >= 1
                 puts "  OH NO! Pokemon has broke free!
                 ".red
+            Pokeball.create(cost:200, kind:"pokeball", bag: bag_obj, pokemon: created_pokemon_obj, caught: false)
                 catch_pokemon_prompt
+            else
+                puts "This will never run"
             end
         elsif check_pokebowls(bag_obj) == false && input == 1
             catch_validation = true
@@ -280,7 +286,11 @@ end
 
 def get_all_pokemons
     user_obj = User.find_by(username: @current_user)
-    pokemons = user_obj.bag.pokemons
+    pokeballs_obj = user_obj.bag.pokeballs
+    caught_array = pokeballs_obj.select do |p| p.pokemon_id if p.caught == true end
+        #  binding.pry
+    array_ids = caught_array.map do |p| p["pokemon_id"] end
+    pokemons = array_ids.map do |p| Pokemon.find(p) end
     pokemons.each do|p| 
         if p.nickname == ""
             puts "#{p.name.capitalize} is a #{p.species.capitalize}.".light_magenta
@@ -288,6 +298,7 @@ def get_all_pokemons
             puts "#{p.nickname.capitalize} is a #{p.species.capitalize}.".light_magenta
         end
     end
+    
 end
 
 
