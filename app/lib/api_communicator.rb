@@ -15,26 +15,24 @@ end
 
 def pokemon_info
     api = pokemon_api
-    get_pokemon_name(api)
-    get_pokemon_kinds(api)
-    get_pokemon_species(api)
-    get_pokemon_id(api)
+    poke_hash = {name:get_pokemon_name(api), kinds: get_pokemon_kinds(api), species: get_pokemon_species(api), api_poke_id: get_pokemon_id(api)}
+    poke_hash
 end
 
 def get_pokemon_name(api)
-    puts api["name"]
+    api["name"]
 end
 
 def get_pokemon_kinds(api)
-    puts api["types"][0]["type"]["name"]
+    api["types"][0]["type"]["name"]
 end
 
 def get_pokemon_species(api)
-    puts api["species"]["name"]
+    api["species"]["name"]
 end
 
 def get_pokemon_id(api)
-    puts api["id"]
+    api["id"]
 end
 
 
