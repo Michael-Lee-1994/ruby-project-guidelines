@@ -11,11 +11,11 @@ end
 
 def welcome
     puts "Welcome to the Pokemonlite CLI
-    ".red
+    ".yellow
 end
 
 def intro_prompt
-    puts "Do you have an account? 'Y' or 'N'"
+    puts "Do you have an account? 'Y' or 'N'".cyan
     account_validation = false
     while account_validation == false do
         input = gets.chomp.downcase 
@@ -32,29 +32,27 @@ def intro_prompt
 end
 
 def log_in
-    puts "Please type in your username"
+    puts "Please type in your username".cyan
     user_validation = false
     while user_validation == false do 
         username_input = gets.chomp.downcase
         user_obj = User.find_by(username:username_input)
         if user_obj && username_input == user_obj.username
-            puts "Please type in your password"
+            puts "Please type in your password".cyan
             password_validation = false
-           
             while password_validation == false do
                 password_input = gets.chomp.downcase
-                pass_obj = User.find_by(password:password_input)
-                if password_input == pass_obj.password && username_input == user_obj.username
+                if password_input == user_obj.password && username_input == user_obj.username
                     @current_user = username_input
                     password_validation = true
                     user_validation = true
                     main_menu
                 else
-                    puts "Sorry, invalid username or password. Please try again."
+                    puts "Sorry, invalid username or password. Please try again.".red
                 end
             end
         else 
-            puts "Invalid username, try again"
+            puts "Invalid username, try again".red
             puts "Do you want to create an account? 'Yes'"
             puts "If not, re-type your username"
             if username_input == "yes"
@@ -109,8 +107,8 @@ def main_menu
             log_out
             main_menu_validation = true
         when 7
-            leave
             main_menu_validation = true
+            leave
         else
             invalid_input
         end
@@ -118,16 +116,18 @@ def main_menu
 end
 
 def main_menu_prompt
-    puts <<-TEXT  
-            Welcome to the main menu, what would you like to do?
-                1. Catch Pokemon
-                2. My Pokemons
-                3. My Bag
-                4. My Money
-                5. Shop
-                6. Log Out
-                7. Exit
-            TEXT
+puts "
+Welcome to the main menu, what would you like to do?".yellow
+puts <<-TEXT  
+
+            1. Catch Pokemon
+            2. My Pokemons
+            3. My Bag
+            4. My Money
+            5. Shop
+            6. Log Out
+            7. Exit
+        TEXT
 end
 
 def get_random_api_pokemon
@@ -146,6 +146,8 @@ puts <<-TEXT
 def check_pokebowls(users_bag)
     bowls_left = users_bag.quantity - 1
     if bowls_left <= 0
+        users_bag.quantity = 0
+        users_bag.save
         return false
     else
         return true
@@ -157,7 +159,9 @@ def rand_int
 end
 
 def pokeball_wiggle
-    puts "POKEBALL WIGGLES!!!"
+    puts "      POKEBALL WIGGLES!!!
+
+    ".yellow
 end
 
 def catch_pokemons
@@ -166,8 +170,8 @@ def catch_pokemons
     encounter_pokemon = get_random_api_pokemon
     poke_nickname = ""
     
-    puts "Wild #{encounter_pokemon[:name]} APPEARED!
-    ".red
+    puts "Wild #{encounter_pokemon[:name].capitalize} APPEARED!
+    ".light_cyan
     catch_pokemon_prompt
     catch_validation = false
     while catch_validation == false do
@@ -178,7 +182,7 @@ def catch_pokemons
             user_obj.bag.save
             if temp > 6
                 3.times{pokeball_wiggle}
-                puts "You have successfully caught #{encounter_pokemon[:name]}!"
+                puts "You have successfully caught #{encounter_pokemon[:name].capitalize}!".light_magenta
                 puts "Would you like to name your pokemon? 'Y' or 'N'"
                 name_validation = false
                 while name_validation == false do
@@ -203,16 +207,23 @@ def catch_pokemons
             main_menu
             elsif temp <= 6 || temp >= 4
                 2.times{pokeball_wiggle}
-                puts "Arg! SO CLOSE!!"
+                puts "  Arg! SO CLOSE!!
+                ".magenta
                 catch_pokemon_prompt 
             else 
-                puts "OH NO! Pokemon has broke free!"
+                puts "  OH NO! Pokemon has broke free!
+                ".red
                 catch_pokemon_prompt
             end
         elsif check_pokebowls(bag_obj) == false && input == 1
-            puts "Sorry, you have no pokeballs!"
+            catch_validation = true
+            puts "Sorry, you have no pokeballs!".red
+            puts "You have ran away".red
+            
+            main_menu
         elsif input == 2
-            puts "Got away safely!"
+            catch_validation = true
+            puts "WHEW! Got away safely!".light_blue
             main_menu
         else
             invalid_input
@@ -225,29 +236,36 @@ def get_all_pokemons
     pokemons = user_obj.bag.pokemons
     pokemons.each do|p| 
         if p.nickname == ""
-            puts "#{p.name.capitalize} is a #{p.species.capitalize}."
+            puts "#{p.name.capitalize} is a #{p.species.capitalize}.".light_magenta
         else
-            puts "#{p.nickname.capitalize} is a #{p.species.capitalize}."
+            puts "#{p.nickname.capitalize} is a #{p.species.capitalize}.".light_magenta
         end
     end
 end
 
 
 def my_pokemons
-    puts "----My Pokemons----"
+    puts "----My Pokemons----
+    ".yellow
     get_all_pokemons
     main_menu
 end
 
 def my_bag
     user_obj = User.find_by(username: @current_user)
-    puts "You have #{user_obj.bag.quantity} #{user_obj.bag.item}(s) in your bag."
+    if user_obj.bag.quantity < 0
+        user_obj.bag.quantity = 0
+        user_obj.bag.save
+    end
+    puts "
+    You have #{user_obj.bag.quantity} #{user_obj.bag.item}(s) in your bag."
     main_menu
 end
 
 def my_money
     user_obj = User.find_by(username: @current_user)
-    puts "You have $#{user_obj.money} left!"
+    puts "
+    You have $#{user_obj.money} left!"
     main_menu
 end
 
@@ -268,16 +286,18 @@ def shop
     user_obj = User.find_by(username: @current_user)
     shop_validation = false
     while shop_validation == false do
-        puts "How many pokeballs would you like to buy?"
+        puts "
+        How many pokeballs would you like to buy?
+        "
         amount = gets.chomp.to_i
         if check_money(user_obj, amount) == true
             total = amount * 200
             money_left = user_obj.money - total
-            shop_validation = true
             user_obj.money = money_left
             user_obj.bag.quantity += amount
             user_obj.save
             user_obj.bag.save
+            shop_validation = true
             main_menu
        end
     end
@@ -296,11 +316,11 @@ end
 
 def leave
     goodbye
-    puts "Closing application"
+    puts "Closing application".green
 end
 
 def invalid_input
-    puts "Invalid input, please try again."
+    puts "Invalid input, please try again.".red
 end
 
 end
