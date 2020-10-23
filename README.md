@@ -30,7 +30,7 @@ Battling feature?????
 If you would like to contribute to our code, pull request. We will review them and if the code is helpful we will acknowledge you in our README.
 
 ## Video Demo
-Pokemon CLI Game Demo
+Pokemon CLI Game Demo:
 https://youtu.be/6F1khBCCyV0
 
 No copyright infringement intended
