@@ -79,6 +79,8 @@ def create_user
     new_user = User.create(name:name, username: username, password:password)
     new_bag = Bag.create(ownersname: "#{name}'s bag", user: new_user)
     Pokeball.create(cost:200, kind:"pokeball", bag: new_bag)
+    puts "Redirecting to the log in 
+    ".red 
     log_in
 end
 
@@ -109,15 +111,50 @@ def main_menu
         when 7
             main_menu_validation = true
             leave
+        when 8
+            delete_account
+            main_menu_validation = true
         else
             invalid_input
         end
     end
 end
 
+def delete_account
+    delete_validation = false
+    delete_validation2 = false
+    puts "Are you sure you want to delete your account? 'Yes, I do' or 'N'"
+    while delete_validation == false do
+        input = gets.chomp.downcase
+        if input == "yes, i do"
+            puts "Are you really really sure that you want to DELETE your account? :( 'Yes, I do!!! or 'N'"
+            while delete_validation2 == false do
+                input2 = gets.chomp.downcase
+                if input2 == "yes, i do!!!"
+                    user_obj = User.find_by(username:@current_user)
+                    user_obj.delete
+                    @current_user = ""
+                    delete_validation = true
+                    delete_validation2 = true
+                    leave
+                else
+                    delete_validation = true
+                    delete_validation2 = true
+                    main_menu
+                end
+            end
+        else
+            delete_validation = true
+            main_menu     
+        end
+    end
+end
+
+
 def main_menu_prompt
+user_obj = User.find_by(username:@current_user)
 puts "
-Welcome to the main menu, what would you like to do?".yellow
+Welcome #{user_obj.name.capitalize} to the main menu, what would you like to do?".yellow
 puts <<-TEXT  
 
             1. Catch Pokemon
@@ -127,6 +164,7 @@ puts <<-TEXT
             5. Shop
             6. Log Out
             7. Exit
+            8. Delete Account
         TEXT
 end
 
